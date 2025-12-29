@@ -1,3 +1,14 @@
+Metadata-Version: 2.4
+Name: nano-wakatime
+Version: 1.0.0
+Summary: A WakaTime plugin wrapper for GNU Nano
+Author-email: Alan Nato <alanwnato@gmail.com>
+License: MIT
+Project-URL: Homepage, https://github.com/iamnotnato/nano-wakatime
+Requires-Python: >=3.7
+Description-Content-Type: text/markdown
+Requires-Dist: watchdog>=2.1.0
+
 # Nano WakaTime Plugin ⏱️
 
 > A lightweight, cross-platform Python wrapper that adds WakaTime tracking to the GNU Nano editor.
@@ -65,17 +76,7 @@ curl -fsSL https://raw.githubusercontent.com/wakatime/vim-wakatime/master/instal
 
 ## 🚀 Installation
 
-### Option 1: Pip Install (Recommended)
-
-```bash
-pip install nano-wakatime
-echo 'alias nano="nanow"' >> ~/.bashrc
-source ~/.bashrc
-```
-
-### Option 2: Manual Installation
-
-#### 1. Download the Wrapper
+### 1. Download the Wrapper
 
 Clone this repository or download the script directly.
 
@@ -84,7 +85,7 @@ git clone https://github.com/YOUR_USERNAME/nano-wakatime.git
 cd nano-wakatime
 ```
 
-#### 2. Install
+### 2. Install
 
 Move the script to your local binary folder and make it executable.
 
@@ -94,7 +95,7 @@ cp nanow.py ~/.local/bin/nanow
 chmod +x ~/.local/bin/nanow
 ```
 
-#### 3. Create the Alias
+### 3. Create the Alias
 
 To make this seamless, alias `nano` to use this wrapper. Add this to your `.bashrc` or `.zshrc`:
 
