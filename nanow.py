@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Nano WakaTime Wrapper
-Author: [Your Name]
+Author: Alan Nato
 License: MIT
 Description: A wrapper for GNU Nano that tracks time using the WakaTime CLI.
 """
@@ -136,12 +136,17 @@ def main():
     # We pass all arguments exactly as received to nano
     try:
         subprocess.call(['nano'] + nano_args)
+
+        # Wait 1.5 seconds so we catch the "Save & Exit" event
+        if observer:
+            time.sleep(1.5)
+
     except KeyboardInterrupt:
         pass  # Handle Ctrl+C gracefully
     except FileNotFoundError:
         print("Error: 'nano' is not installed or not in your PATH.")
     finally:
-        # 5. Cleanup
+        # Now it is safe to kill the watcher
         if observer:
             observer.stop()
             observer.join()
