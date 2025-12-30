@@ -1,0 +1,91 @@
+name: Cleanup Failed Deployments
+
+on:
+  workflow_dispatch:  # Manual trigger from Actions tab
+  schedule:
+    - cron: '0 0 * * 0'  # Weekly on Sunday at midnight UTC
+
+jobs:
+  cleanup: 
+    runs-on: ubuntu-latest
+    permissions:
+      deployments: write
+      contents: read
+    
+    steps:
+      - name:  Cleanup failed deployments
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets. GITHUB_TOKEN }}
+          script:  |
+            const owner = context.repo.owner;
+            const repo = context.repo. repo;
+            
+            console.log(`Fetching deployments for ${owner}/${repo}...`);
+            
+            // Get all deployments
+            const { data: deployments } = await github.rest.repos.listDeployments({
+              owner,
+              repo,
+              per_page:  100
+            });
+            
+            console.log(`Found ${deployments.length} deployments`);
+            
+            let deletedCount = 0;
+            let failedCount = 0;
+            
+            for (const deployment of deployments) {
+              try {
+                // Get deployment statuses
+                const { data: statuses } = await github.rest. repos.listDeploymentStatuses({
+                  owner,
+                  repo,
+                  deployment_id: deployment.id
+                });
+                
+                // Check if the latest status is failed or error
+                const latestStatus = statuses[0]?.state;
+                
+                if (latestStatus === 'failure' || latestStatus === 'error') {
+                  console.log(`Found failed deployment #${deployment.id} with status: ${latestStatus}`);
+                  
+                  // Mark deployment as inactive (required before deletion)
+                  await github. rest.repos.createDeploymentStatus({
+                    owner,
+                    repo,
+                    deployment_id: deployment.id,
+                    state: 'inactive',
+                    description: 'Marked inactive for cleanup'
+                  });
+                  
+                  console.log(`Marked deployment #${deployment.id} as inactive`);
+                  
+                  // Delete the deployment
+                  await github.rest.repos.deleteDeployment({
+                    owner,
+                    repo,
+                    deployment_id: deployment.id
+                  });
+                  
+                  console.log(`✅ Deleted failed deployment #${deployment.id}`);
+                  deletedCount++;
+                } else {
+                  console.log(`Skipping deployment #${deployment.id} with status: ${latestStatus || 'none'}`);
+                }
+              } catch (error) {
+                console.error(`❌ Error processing deployment #${deployment.id}: `, error.message);
+                failedCount++;
+              }
+            }
+            
+            console.log(`\n📊 Summary:`);
+            console.log(`   - Total deployments checked: ${deployments.length}`);
+            console.log(`   - Failed deployments deleted: ${deletedCount}`);
+            console.log(`   - Errors encountered: ${failedCount}`);
+            
+            if (deletedCount > 0) {
+              core.notice(`Successfully deleted ${deletedCount} failed deployment(s)`);
+            } else {
+              core.notice('No failed deployments found to delete');
+            }
