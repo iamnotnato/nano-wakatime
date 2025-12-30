@@ -31,6 +31,7 @@ jobs:
           VERSION=${GITHUB_REF_NAME#v}
           echo "Updating version to $VERSION"
           sed -i "s/^version[[:space:]]*=[[:space:]]*.*/version = \"$VERSION\"/" pyproject.toml
+          cat pyproject.toml
 
       - name: Build release distributions
         run: |
@@ -41,7 +42,7 @@ jobs:
       - name: Upload distributions
         uses: actions/upload-artifact@v4
         with:
-          name: release-dists
+          name: release-dists-${{ github.sha }}
           path: dist/
 
   pypi-publish:
@@ -63,7 +64,7 @@ jobs:
       - name: Retrieve release distributions
         uses: actions/download-artifact@v4
         with:
-          name: release-dists
+          name: release-dists-${{ github.sha }}
           path: dist/
 
       - name: Publish release distributions to PyPI
