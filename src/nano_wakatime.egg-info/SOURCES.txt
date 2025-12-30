@@ -6,5 +6,5 @@ src/nano_wakatime.egg-info/dependency_links.txt
 src/nano_wakatime.egg-info/entry_points.txt
 src/nano_wakatime.egg-info/requires.txt
 src/nano_wakatime.egg-info/top_level.txt
-src/nanow/_init__.py
+src/nanow/__init__.py
 src/nanow/cli.py
