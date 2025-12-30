@@ -95,6 +95,41 @@ def find_waka_cli():
         return path_bin
     return None
 
+def install_nano():
+    """Attempts to install nano using the system package manager."""
+    print("Nano not found. Attempting to install...")
+    
+    # List of (manager_binary, install_command)
+    managers = [
+        ("apt-get", ["apt-get", "install", "-y", "nano"]),
+        ("dnf", ["dnf", "install", "-y", "nano"]),
+        ("yum", ["yum", "install", "-y", "nano"]),
+        ("pacman", ["pacman", "-S", "--noconfirm", "nano"]),
+        ("brew", ["brew", "install", "nano"]),
+        ("apk", ["apk", "add", "nano"]),
+    ]
+    
+    for manager, cmd in managers:
+        if shutil.which(manager):
+            try:
+                full_cmd = cmd
+                # Prepend sudo if not root and not using brew
+                if manager != "brew" and hasattr(os, "geteuid") and os.geteuid() != 0:
+                    if shutil.which("sudo"):
+                        full_cmd = ["sudo"] + cmd
+                
+                print(f"Running: {' '.join(full_cmd)}")
+                subprocess.check_call(full_cmd)
+                print("Nano installed successfully.")
+                return True
+            except subprocess.CalledProcessError:
+                print(f"Failed to install using {manager}.")
+            except Exception as e:
+                print(f"Error installing with {manager}: {e}")
+                
+    print("Could not install nano automatically. Please install it manually.")
+    return False
+
 def main():
     # 1. Parse arguments meant for Nano
     nano_args = sys.argv[1:]
@@ -144,7 +179,15 @@ def main():
     except KeyboardInterrupt:
         pass  # Handle Ctrl+C gracefully
     except FileNotFoundError:
-        print("Error: 'nano' is not installed or not in your PATH.")
+        if install_nano():
+            try:
+                subprocess.call(['nano'] + nano_args)
+                if observer:
+                    time.sleep(1.5)
+            except FileNotFoundError:
+                print("Error: 'nano' still not found after installation.")
+        else:
+            print("Error: 'nano' is not installed or not in your PATH.")
     finally:
         # Now it is safe to kill the watcher
         if observer:
