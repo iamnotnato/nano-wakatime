@@ -17,7 +17,7 @@ from typing import List
 # --- Configuration ---
 # Default path for wakatime-cli (standard installation)
 WAKATIME_CLI_DEFAULT = os.path.expanduser("~/.wakatime/wakatime-cli")
-USER_AGENT = "nano-wakatime/1.1.0"
+USER_AGENT = "nano-wakatime/1.0.2"
 
 # Check for watchdog dependency
 try:
